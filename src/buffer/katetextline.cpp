@@ -187,15 +187,15 @@ void TextLineData::addAttribute(const Attribute &attribute)
         return;
     }
 
-    m_attributesList.append(attribute);
+    m_attributesList.push_front(attribute);
 }
 
 short TextLineData::attribute(int pos) const
 {
     auto found = std::upper_bound(m_attributesList.cbegin(), m_attributesList.cend(), pos, [](int p, const Attribute &x) {
-        return p < x.offset + x.length && x.type == Attribute::NormalAttribute;
+        return p < x.offset + x.length;
     });
-    if (found != m_attributesList.cend() && found->offset <= pos && pos < (found->offset + found->length)) {
+    if (found != m_attributesList.cend() && found->offset <= pos && pos < (found->offset + found->length) && !found->isFoldingAttribute()) {
         return found->attributeValue;
     }
     return 0;
