@@ -178,9 +178,11 @@ int TextLineData::virtualLength(int tabWidth) const
 
 void TextLineData::addAttribute(const Attribute &attribute)
 {
+    Q_ASSERT(attribute.type == Attribute::NormalAttribute);
+
     // try to append to previous range, if same attribute value
     if (!m_attributesList.isEmpty() && (m_attributesList.back().attributeValue == attribute.attributeValue)
-        && ((m_attributesList.back().offset + m_attributesList.back().length) == attribute.offset)) {
+        && ((m_attributesList.back().offset + m_attributesList.back().length) == attribute.offset) && m_attributesList.back().type == attribute.type) {
         m_attributesList.back().length += attribute.length;
         return;
     }
@@ -190,8 +192,8 @@ void TextLineData::addAttribute(const Attribute &attribute)
 
 short TextLineData::attribute(int pos) const
 {
-    auto found = std::upper_bound(m_attributesList.cbegin(), m_attributesList.cend(), pos, [](const int &p, const Attribute &x) {
-        return p < x.offset + x.length;
+    auto found = std::upper_bound(m_attributesList.cbegin(), m_attributesList.cend(), pos, [](int p, const Attribute &x) {
+        return p < x.offset + x.length && x.type == Attribute::NormalAttribute;
     });
     if (found != m_attributesList.cend() && found->offset <= pos && pos < (found->offset + found->length)) {
         return found->attributeValue;

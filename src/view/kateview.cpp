@@ -3969,7 +3969,7 @@ QList<KTextEditor::AttributeBlock> KTextEditor::ViewPrivate::lineAttributes(int 
 
     const QVector<Kate::TextLineData::Attribute> &intAttrs = kateLine->attributesList();
     for (int i = 0; i < intAttrs.size(); ++i) {
-        if (intAttrs[i].length > 0 && intAttrs[i].attributeValue > 0) {
+        if (!intAttrs[i].isFoldingAttribute() && intAttrs[i].length > 0 && intAttrs[i].attributeValue > 0) {
             attribs << KTextEditor::AttributeBlock(intAttrs.at(i).offset, intAttrs.at(i).length, renderer()->attribute(intAttrs.at(i).attributeValue));
         }
     }

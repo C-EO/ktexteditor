@@ -36,16 +36,19 @@ public:
     class Attribute
     {
     public:
+        enum AttributeType : uint8_t { NormalAttribute, FoldingAttribute };
+
         /**
          * Attribute constructor
          * @param _offset offset
          * @param _length length
          * @param _attributeValue attribute value
          */
-        explicit Attribute(int _offset = 0, int _length = 0, short _attributeValue = 0)
+        constexpr explicit Attribute(int _offset = 0, int _length = 0, short _attributeValue = 0, AttributeType _type = NormalAttribute)
             : offset(_offset)
             , length(_length)
             , attributeValue(_attributeValue)
+            , type(_type)
         {
         }
 
@@ -55,42 +58,30 @@ public:
         int offset;
 
         /**
+         * For FoldingAttribute:
+         * positive value start foldings, negative ones end them
+         *
          * length
          */
         int length;
 
         /**
+         * For FoldingAttribute:
+         * This is unused
+         *
          * attribute value (to encode type of this range)
          */
         short attributeValue;
-    };
 
-    /**
-     * Folding storage
-     */
-    class Folding
-    {
-    public:
         /**
-         * Construct folding.
-         * @param _offset offset of the folding start
-         * @param _foldingValue positive ones start foldings, negative ones end them
+         * Folding attribute or normal?
          */
-        Folding(int _offset, int _foldingValue)
-            : offset(_offset)
-            , foldingValue(_foldingValue)
+        AttributeType type;
+
+        constexpr bool isFoldingAttribute() const
         {
+            return type == FoldingAttribute;
         }
-
-        /**
-         * offset
-         */
-        int offset = 0;
-
-        /**
-         * positive ones start foldings, negative ones end them
-         */
-        int foldingValue = 0;
     };
 
     /**
@@ -380,7 +371,6 @@ public:
     void clearAttributesAndFoldings()
     {
         m_attributesList.clear();
-        m_foldings.clear();
     }
 
     /**
@@ -393,27 +383,18 @@ public:
     }
 
     /**
-     * Accessor to foldings
-     * @return foldings of this line
-     */
-    const std::vector<Folding> &foldings() const
-    {
-        return m_foldings;
-    }
-
-    /**
      * Add new folding at end of foldings stored in this line
      * @param offset offset of folding start
      * @param folding folding to add, positive to open, negative to close
      */
     void addFolding(int offset, int folding)
     {
-        m_foldings.emplace_back(offset, folding);
+        m_attributesList.push_back(Attribute(offset, folding, 0, Attribute::FoldingAttribute));
     }
 
     /**
      * Gets the attribute at the given position
-     * use KRenderer::attributes  to get the KTextAttribute for this.
+     * use KRenderer::attributes to get the KTextAttribute for this.
      *
      * @param pos position of attribute requested
      * @return value of attribute
@@ -451,14 +432,9 @@ private:
     QString m_text;
 
     /**
-     * attributes of this line
+     * attributes + foldings of this line
      */
     QVector<Attribute> m_attributesList;
-
-    /**
-     * foldings of this line
-     */
-    std::vector<Folding> m_foldings;
 
     /**
      * current highlighting state

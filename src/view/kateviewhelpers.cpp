@@ -496,10 +496,12 @@ const QColor KateScrollBar::charColor(const QVector<Kate::TextLineData::Attribut
     // plain Kate), query the styles, that is, the default kate syntax highlighting.
     if (!styleFound) {
         // go to the block containing x
-        while ((attributeIndex < attributes.size()) && ((attributes[attributeIndex].offset + attributes[attributeIndex].length) < x)) {
+        while ((attributeIndex < attributes.size()) && !attributes[attributeIndex].isFoldingAttribute()
+               && ((attributes[attributeIndex].offset + attributes[attributeIndex].length) < x)) {
             ++attributeIndex;
         }
-        if ((attributeIndex < attributes.size()) && (x < attributes[attributeIndex].offset + attributes[attributeIndex].length)) {
+        if ((attributeIndex < attributes.size()) && !attributes[attributeIndex].isFoldingAttribute()
+            && (x < attributes[attributeIndex].offset + attributes[attributeIndex].length)) {
             color = m_view->renderer()->attribute(attributes[attributeIndex].attributeValue)->foreground().color();
         }
     }
