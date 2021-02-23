@@ -3904,8 +3904,11 @@ void KTextEditor::DocumentPrivate::comment(KTextEditor::ViewPrivate *v, uint lin
 
     if (c < ln->length()) {
         startAttrib = ln->attribute(c);
-    } else if (!ln->attributesList().isEmpty()) {
-        startAttrib = ln->attributesList().back().attributeValue;
+    } else {
+        auto attrPair = ln->lastAttribute();
+        if (attrPair.first) {
+            startAttrib = attrPair.second.attributeValue;
+        }
     }
 
     bool hasStartLineCommentMark = !(highlight()->getCommentSingleLineStart(startAttrib).isEmpty());
@@ -5905,8 +5908,9 @@ int KTextEditor::DocumentPrivate::defStyleNum(int line, int column)
     if (column < tl->length()) {
         attribute = tl->attribute(column);
     } else if (column == tl->length()) {
-        if (!tl->attributesList().isEmpty()) {
-            attribute = tl->attributesList().back().attributeValue;
+        auto attrPair = tl->lastAttribute();
+        if (attrPair.first) {
+            attribute = attrPair.second.attributeValue;
         } else {
             return -1;
         }

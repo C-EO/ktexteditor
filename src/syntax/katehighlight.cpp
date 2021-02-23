@@ -130,7 +130,8 @@ void KateHighlighting::doHighlight(const Kate::TextLineData *prevLine,
     }
 
     // in all cases, remove old hl, or we will grow to infinite ;)
-    textLine->clearAttributesAndFoldings();
+    // clear previous line foldings and attributes
+    clearAttributesAndFoldings();
 
     // reset folding start
     textLine->clearMarkedAsFoldingStart();
@@ -150,6 +151,9 @@ void KateHighlighting::doHighlight(const Kate::TextLineData *prevLine,
     const KSyntaxHighlighting::State initialState(!prevLine ? KSyntaxHighlighting::State() : prevLine->highlightingState());
     const KSyntaxHighlighting::State endOfLineState = highlightLine(textLine->string(), initialState);
     m_textLineToHighlight = nullptr;
+
+    // update line attributes and foldings
+    textLine->setAttributesAndFoldings(m_lineAttributes, m_lineFoldings);
 
     // update highlighting state if needed
     if (textLine->highlightingState() != endOfLineState) {
@@ -191,7 +195,7 @@ void KateHighlighting::applyFormat(int offset, int length, const KSyntaxHighligh
     Q_ASSERT(it != m_formatsIdToIndex.end());
 
     // remember highlighting info in our textline
-    m_textLineToHighlight->addAttribute(Kate::TextLineData::Attribute(offset, length, it->second));
+    addAttribute(Kate::TextLineData::Attribute(offset, length, it->second));
 }
 
 void KateHighlighting::applyFolding(int offset, int length, KSyntaxHighlighting::FoldingRegion region)
@@ -200,7 +204,8 @@ void KateHighlighting::applyFolding(int offset, int length, KSyntaxHighlighting:
     Q_ASSERT(m_textLineToHighlight);
     Q_ASSERT(region.isValid());
     const int foldingValue = (region.type() == KSyntaxHighlighting::FoldingRegion::Begin) ? int(region.id()) : -int(region.id());
-    m_textLineToHighlight->addFolding(offset + ((region.type() == KSyntaxHighlighting::FoldingRegion::Begin) ? 0 : length), foldingValue);
+    Kate::TextLineData::Attribute fold(offset + ((region.type() == KSyntaxHighlighting::FoldingRegion::Begin) ? 0 : length), foldingValue, 0, Kate::TextLineData::Attribute::FoldingAttribute);
+    m_lineFoldings.push_back(fold);
 
     // for each end region, decrement counter for that type, erase if count reaches 0!
     if (foldingValue < 0) {
@@ -416,8 +421,9 @@ int KateHighlighting::attributeForLocation(KTextEditor::DocumentPrivate *doc, co
     if (cursor.column() < tl->length()) {
         return sanitizeFormatIndex(tl->attribute(cursor.column()));
     } else if (cursor.column() >= tl->length()) {
-        if (!tl->attributesList().isEmpty()) {
-            return sanitizeFormatIndex(tl->attributesList().back().attributeValue);
+        auto attrPair = tl->lastAttribute();
+        if (attrPair.first) {
+            sanitizeFormatIndex(attrPair.second.attributeValue);
         }
     }
     return 0;

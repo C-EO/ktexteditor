@@ -287,6 +287,27 @@ public:
 private:
     int sanitizeFormatIndex(int attrib) const;
 
+    void clearAttributesAndFoldings()
+    {
+        m_lineAttributes.clear();
+        m_lineFoldings.clear();
+    }
+
+    void addAttribute(const Kate::TextLineData::Attribute &attribute)
+    {
+        Q_ASSERT(attribute.type == Kate::TextLineData::Attribute::NormalAttribute);
+
+        // try to append to previous range, if same attribute value
+        if (!m_lineAttributes.isEmpty() && (m_lineAttributes.back().attributeValue == attribute.attributeValue)
+            && ((m_lineAttributes.back().offset + m_lineAttributes.back().length) == attribute.offset)) {
+            m_lineAttributes.back().length += attribute.length;
+            return;
+        }
+
+        m_lineAttributes.push_back(attribute);
+    }
+
+
 private:
     QStringList embeddedHighlightingModes;
 
@@ -298,6 +319,15 @@ private:
     bool iHidden = false;
     QString identifier;
     QString iStyle;
+
+    /**
+     * foldings for current line
+     */
+    QVector<Kate::TextLineData::Attribute> m_lineFoldings;
+    /**
+     * attributes for current line
+     */
+    QVector<Kate::TextLineData::Attribute> m_lineAttributes;
 
     /**
      * Indentation mode, e.g. c-style, ....

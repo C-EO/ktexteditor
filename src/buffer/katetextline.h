@@ -360,17 +360,12 @@ public:
     }
 
     /**
-     * Add attribute to this line.
-     * @param attribute new attribute to append
+     * Set attributes and foldings of this line
      */
-    void addAttribute(const Attribute &attribute);
-
-    /**
-     * Clear attributes and foldings of this line
-     */
-    void clearAttributesAndFoldings()
+    void setAttributesAndFoldings(const QVector<Attribute>& attributes, const QVector<Attribute>& foldings)
     {
-        m_attributesList.clear();
+        m_attributesList = attributes;
+        m_attributesList.append(foldings);
     }
 
     /**
@@ -383,14 +378,10 @@ public:
     }
 
     /**
-     * Add new folding at end of foldings stored in this line
-     * @param offset offset of folding start
-     * @param folding folding to add, positive to open, negative to close
+     * @brief return last NormalAttribute from m_attributesList. If
+     * there was no attribute found, bool will be false
      */
-    void addFolding(int offset, int folding)
-    {
-        m_attributesList.push_back(Attribute(offset, folding, 0, Attribute::FoldingAttribute));
-    }
+    std::pair<bool, Attribute> lastAttribute() const;
 
     /**
      * Gets the attribute at the given position

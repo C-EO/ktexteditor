@@ -388,8 +388,12 @@ KateRenderer::decorationsForLine(const Kate::TextLine &textLine, int line, bool 
     if (!al.isEmpty()) {
         auto &currentRange = renderRanges.pushNewRange();
         for (int i = 0; i < std::min(al.count(), limitOfRanges); ++i) {
-            if (al[i].length > 0 && al[i].attributeValue > 0) {
-                currentRange.addRange(KTextEditor::Range(KTextEditor::Cursor(line, al[i].offset), al[i].length), specificAttribute(al[i].attributeValue));
+            const auto& attr = al.at(i);
+            if (attr.isFoldingAttribute()) {
+                continue;
+            }
+            if (attr.length > 0 && attr.attributeValue > 0) {
+                currentRange.addRange(KTextEditor::Range(KTextEditor::Cursor(line, attr.offset), attr.length), specificAttribute(attr.attributeValue));
             }
         }
     }

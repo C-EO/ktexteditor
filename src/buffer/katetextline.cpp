@@ -176,29 +176,26 @@ int TextLineData::virtualLength(int tabWidth) const
     return x;
 }
 
-void TextLineData::addAttribute(const Attribute &attribute)
+std::pair<bool, TextLineData::Attribute> TextLineData::lastAttribute() const
 {
-    Q_ASSERT(attribute.type == Attribute::NormalAttribute);
-
-    // try to append to previous range, if same attribute value
-    if (!m_attributesList.isEmpty() && (m_attributesList.back().attributeValue == attribute.attributeValue)
-        && ((m_attributesList.back().offset + m_attributesList.back().length) == attribute.offset) && m_attributesList.back().type == attribute.type) {
-        m_attributesList.back().length += attribute.length;
-        return;
+    for (int i = m_attributesList.size() - 1; i >= 0; --i) {
+        if (!m_attributesList.at(i).isFoldingAttribute()) {
+            return {true, m_attributesList.at(i)};
+        }
     }
-
-    m_attributesList.push_front(attribute);
+    return {false, TextLineData::Attribute{}};
 }
 
 short TextLineData::attribute(int pos) const
 {
-    auto found = std::upper_bound(m_attributesList.cbegin(), m_attributesList.cend(), pos, [](int p, const Attribute &x) {
-        return p < x.offset + x.length;
-    });
-    if (found != m_attributesList.cend() && found->offset <= pos && pos < (found->offset + found->length) && !found->isFoldingAttribute()) {
-        return found->attributeValue;
+    int attribute = 0;
+    for (const auto& attr : qAsConst(m_attributesList)) {
+        if (pos < attr.offset + attr.length && !attr.isFoldingAttribute()) {
+            attribute = attr.attributeValue;
+            break;
+        }
     }
-    return 0;
+    return attribute;
 }
 
 }
