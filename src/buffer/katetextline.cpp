@@ -176,20 +176,20 @@ int TextLineData::virtualLength(int tabWidth) const
     return x;
 }
 
-std::pair<bool, TextLineData::Attribute> TextLineData::lastAttribute() const
+std::pair<bool, short> TextLineData::lastAttributeValue() const
 {
     for (int i = m_attributesList.size() - 1; i >= 0; --i) {
         if (!m_attributesList.at(i).isFoldingAttribute()) {
-            return {true, m_attributesList.at(i)};
+            return {true, m_attributesList.at(i).attributeValue};
         }
     }
-    return {false, TextLineData::Attribute{}};
+    return {false, -1};
 }
 
 short TextLineData::attribute(int pos) const
 {
-    int attribute = 0;
-    for (const auto& attr : qAsConst(m_attributesList)) {
+    short attribute = 0;
+    for (const auto &attr : qAsConst(m_attributesList)) {
         if (pos < attr.offset + attr.length && !attr.isFoldingAttribute()) {
             attribute = attr.attributeValue;
             break;

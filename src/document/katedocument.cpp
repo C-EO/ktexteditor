@@ -3905,9 +3905,9 @@ void KTextEditor::DocumentPrivate::comment(KTextEditor::ViewPrivate *v, uint lin
     if (c < ln->length()) {
         startAttrib = ln->attribute(c);
     } else {
-        auto attrPair = ln->lastAttribute();
+        const auto attrPair = ln->lastAttributeValue();
         if (attrPair.first) {
-            startAttrib = attrPair.second.attributeValue;
+            startAttrib = attrPair.second;
         }
     }
 
@@ -5908,9 +5908,9 @@ int KTextEditor::DocumentPrivate::defStyleNum(int line, int column)
     if (column < tl->length()) {
         attribute = tl->attribute(column);
     } else if (column == tl->length()) {
-        auto attrPair = tl->lastAttribute();
+        auto attrPair = tl->lastAttributeValue();
         if (attrPair.first) {
-            attribute = attrPair.second.attributeValue;
+            attribute = attrPair.second;
         } else {
             return -1;
         }

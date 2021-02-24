@@ -295,7 +295,7 @@ private:
 
     void addAttribute(const Kate::TextLineData::Attribute &attribute)
     {
-        Q_ASSERT(attribute.type == Kate::TextLineData::Attribute::NormalAttribute);
+        Q_ASSERT(attribute.type == Kate::TextLineData::Attribute::AttributeType::Format);
 
         // try to append to previous range, if same attribute value
         if (!m_lineAttributes.isEmpty() && (m_lineAttributes.back().attributeValue == attribute.attributeValue)
@@ -306,7 +306,6 @@ private:
 
         m_lineAttributes.push_back(attribute);
     }
-
 
 private:
     QStringList embeddedHighlightingModes;

@@ -203,8 +203,11 @@ void KateHighlighting::applyFolding(int offset, int length, KSyntaxHighlighting:
     // WE ATM assume ascending offset order, we add the length to the offset for the folding ends to have ranges spanning the full folding region
     Q_ASSERT(m_textLineToHighlight);
     Q_ASSERT(region.isValid());
-    const int foldingValue = (region.type() == KSyntaxHighlighting::FoldingRegion::Begin) ? int(region.id()) : -int(region.id());
-    Kate::TextLineData::Attribute fold(offset + ((region.type() == KSyntaxHighlighting::FoldingRegion::Begin) ? 0 : length), foldingValue, 0, Kate::TextLineData::Attribute::FoldingAttribute);
+
+    const bool foldingRegionBegin = (region.type() == KSyntaxHighlighting::FoldingRegion::Begin);
+    const int foldingValue = foldingRegionBegin ? int(region.id()) : -int(region.id());
+    using Attrib = Kate::TextLineData::Attribute;
+    Attrib fold(offset + (foldingRegionBegin ? 0 : length), foldingValue, 0, Attrib::AttributeType::Folding);
     m_lineFoldings.push_back(fold);
 
     // for each end region, decrement counter for that type, erase if count reaches 0!
@@ -421,9 +424,9 @@ int KateHighlighting::attributeForLocation(KTextEditor::DocumentPrivate *doc, co
     if (cursor.column() < tl->length()) {
         return sanitizeFormatIndex(tl->attribute(cursor.column()));
     } else if (cursor.column() >= tl->length()) {
-        auto attrPair = tl->lastAttribute();
+        auto attrPair = tl->lastAttributeValue();
         if (attrPair.first) {
-            sanitizeFormatIndex(attrPair.second.attributeValue);
+            sanitizeFormatIndex(attrPair.second);
         }
     }
     return 0;

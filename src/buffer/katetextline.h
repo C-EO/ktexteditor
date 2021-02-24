@@ -36,7 +36,7 @@ public:
     class Attribute
     {
     public:
-        enum AttributeType : uint8_t { NormalAttribute, FoldingAttribute };
+        enum class AttributeType : uint8_t { Format, Folding };
 
         /**
          * Attribute constructor
@@ -44,12 +44,13 @@ public:
          * @param _length length
          * @param _attributeValue attribute value
          */
-        constexpr explicit Attribute(int _offset = 0, int _length = 0, short _attributeValue = 0, AttributeType _type = NormalAttribute)
+        explicit Attribute(int _offset = 0, int _length = 0, short _attributeValue = 0, AttributeType _type = AttributeType::Format)
             : offset(_offset)
             , length(_length)
             , attributeValue(_attributeValue)
             , type(_type)
         {
+            Q_ASSERT((_type == AttributeType::Folding && _attributeValue == 0) || (_type == AttributeType::Format));
         }
 
         /**
@@ -58,7 +59,7 @@ public:
         int offset;
 
         /**
-         * For FoldingAttribute:
+         * For AttributeType::Folding:
          * positive value start foldings, negative ones end them
          *
          * length
@@ -66,7 +67,7 @@ public:
         int length;
 
         /**
-         * For FoldingAttribute:
+         * For AttributeType::Folding:
          * This is unused
          *
          * attribute value (to encode type of this range)
@@ -78,16 +79,22 @@ public:
          */
         AttributeType type;
 
-        constexpr bool isFoldingAttribute() const
+        bool isFoldingAttribute() const
         {
-            return type == FoldingAttribute;
+            return type == AttributeType::Folding;
         }
     };
 
     /**
      * Flags of TextLineData
      */
-    enum Flags { flagAutoWrapped = 1, flagFoldingStartAttribute = 2, flagFoldingStartIndentation = 4, flagLineModified = 8, flagLineSavedOnDisk = 16 };
+    enum Flags {
+        flagAutoWrapped = 1,
+        flagFoldingStartAttribute = 2,
+        flagFoldingStartIndentation = 4,
+        flagLineModified = 8,
+        flagLineSavedOnDisk = 16,
+    };
 
     /**
      * Construct an empty text line.
@@ -362,7 +369,7 @@ public:
     /**
      * Set attributes and foldings of this line
      */
-    void setAttributesAndFoldings(const QVector<Attribute>& attributes, const QVector<Attribute>& foldings)
+    void setAttributesAndFoldings(const QVector<Attribute> &attributes, const QVector<Attribute> &foldings)
     {
         m_attributesList = attributes;
         m_attributesList.append(foldings);
@@ -378,10 +385,10 @@ public:
     }
 
     /**
-     * @brief return last NormalAttribute from m_attributesList. If
+     * @brief return last "Format" attribute value from m_attributesList. If
      * there was no attribute found, bool will be false
      */
-    std::pair<bool, Attribute> lastAttribute() const;
+    std::pair<bool, short> lastAttributeValue() const;
 
     /**
      * Gets the attribute at the given position

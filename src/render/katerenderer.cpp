@@ -388,7 +388,7 @@ KateRenderer::decorationsForLine(const Kate::TextLine &textLine, int line, bool 
     if (!al.isEmpty()) {
         auto &currentRange = renderRanges.pushNewRange();
         for (int i = 0; i < std::min(al.count(), limitOfRanges); ++i) {
-            const auto& attr = al.at(i);
+            const auto &attr = al.at(i);
             if (attr.isFoldingAttribute()) {
                 continue;
             }
