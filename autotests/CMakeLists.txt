@@ -166,3 +166,6 @@ endif()
 # benchmarking tests
 add_executable(bench_search src/benchmarks/bench_search.cpp)
 target_link_libraries(bench_search PRIVATE ${KTEXTEDITOR_TEST_LINK_LIBS})
+
+add_executable(example src/example.cpp)
+target_link_libraries(example PRIVATE ${KTEXTEDITOR_TEST_LINK_LIBS})
