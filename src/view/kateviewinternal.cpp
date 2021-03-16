@@ -1796,19 +1796,14 @@ void KateViewInternal::cursorUp(bool sel)
     KTextEditor::Cursor c = renderer()->xToCursor(pRange, m_preservedX, !view()->wrapCursor());
 
     // Maybe we didn't move at all?
-    // Try to update the cursor according to the X in cur line
     if (!pRange.includesCursor(c) || c == m_displayCursor) {
-        int curX = renderer()->cursorToX(thisLine, m_displayCursor.column());
-        c = renderer()->xToCursor(pRange, curX, !view()->wrapCursor());
-    }
-
-    // still didn't move? => just decrement the col / line
-    if (c == m_displayCursor) {
-        if (c.column() > 0) {
+        // off by one? Decrement column
+        if (c.column() == thisLine.startCol()) {
             c.setColumn(c.column() - 1);
         } else {
-            // This is not the first line
-            c.setLine(c.line() - 1);
+            // Try to update the cursor according to the X in cur line
+            int curX = renderer()->cursorToX(thisLine, m_displayCursor.column());
+            c = renderer()->xToCursor(pRange, curX, !view()->wrapCursor());
         }
     }
 
