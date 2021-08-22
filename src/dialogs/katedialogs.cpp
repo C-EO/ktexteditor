@@ -53,6 +53,7 @@
 #include <KMessageBox>
 #include <KProcess>
 #include <KSeparator>
+#include <kwidgetsaddons_version.h>
 
 #include <QCheckBox>
 #include <QClipboard>
@@ -671,7 +672,13 @@ KateViewDefaultsConfig::KateViewDefaultsConfig(QWidget *parent)
 
     QWidget *fontTab = new QWidget(tabWidget);
     QGridLayout *grid = new QGridLayout(fontTab);
+
+#if KWIDGETSADDONS_VERSION >= QT_VERSION_CHECK(5, 86, 0)
+    m_fontchooser = new KFontChooser(KFontChooser::NoDisplayFlags, fontTab);
+#else
     m_fontchooser = new KFontChooser(fontTab, KFontChooser::NoDisplayFlags);
+#endif
+
     grid->addWidget(m_fontchooser, 0, 0);
     tabWidget->addTab(fontTab, i18n("Font"));
 
